@@ -5,9 +5,8 @@ import settings
 class Cell:
     all = []
 
-    #is_mine is a landmine.
-    def __init__(self,x,y,is_mine=False):
-        self.is_mine=is_mine
+    def __init__(self,x,y,is_landmine=False):
+        self.is_landmine=is_landmine
         self.cell_button_obj = None
         self.x=x
         self.y=y
@@ -23,7 +22,7 @@ class Cell:
             # bg="green",
             width=8,
             height=4,
-            text=f"{self.x},{self.y}"
+            # text=f"{self.x},{self.y}"
         )
 
         buttn.bind('<Button-1>', self.left_click_actions)
@@ -32,7 +31,7 @@ class Cell:
         self.cell_button_obj = buttn
 
     def left_click_actions(self, event):
-        if self.is_mine:
+        if self.is_landmine:
             self.show_mine()
         else:
             self.show_cell()
@@ -58,9 +57,17 @@ class Cell:
         cells = [cell for cell in cells if cell is not None]
         return cells
 
+    #check adjacent cell if its a landmine.
+    @property
+    def surrounded_cells_mines_length(self):
+        counter =0
+        for cell in self.surrounded_cells:
+            if cell.is_landmine:
+                counter+=1
+        return counter
+
     def show_cell(self):
-        
-        print(self.surrounded_cells)
+        self.cell_button_obj.configure(text=self.surrounded_cells_mines_length)
 
     def show_mine(self):
         # interrrupt game and display message player lost
@@ -78,7 +85,7 @@ class Cell:
             Cell.all, settings.MINES_COUNT
         )
         for picked_cell in picked_cells:
-            picked_cell.is_mine = True
+            picked_cell.is_landmine = True
 
     def __repr__(self):
         return f"Cell({self.x}, {self.y})"
