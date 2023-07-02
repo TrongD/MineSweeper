@@ -30,7 +30,7 @@ left_frame.place(x=0,y=utils.height_percent(25))
 #Main Game section of window
 center_frame = Frame(
     root, 
-    bg='red',
+    # bg='red',
     width=utils.width_percent(75),
     height=utils.height_percent(75)
 )
@@ -44,6 +44,12 @@ for x in range(settings.GRID_SIZE):
         c=Cell(x,y)
         c.create_btn_obj(center_frame)
         c.cell_button_obj.grid(column=x, row=y)
+
+#Call label from the cell class
+Cell.create_cell_count_label(left_frame)
+Cell.cell_count_label_object.place(x=0,y=0
+)
+
 
 # print(Cell.all)
 Cell.randomize_mines()

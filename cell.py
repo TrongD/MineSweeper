@@ -1,12 +1,17 @@
-from tkinter import Button
+from tkinter import Button, Label, messagebox
 import random
 import settings
+import ctypes
 
 class Cell:
     all = []
+    cell_count=settings.CELL_COUNT
+    cell_count_label_object = None
 
     def __init__(self,x,y,is_landmine=False):
         self.is_landmine=is_landmine
+        self.is_opened=False
+        self.is_mine_candidate=False
         self.cell_button_obj = None
         self.x=x
         self.y=y
@@ -18,8 +23,8 @@ class Cell:
     def create_btn_obj(self, location):
         # self.randomize_mines()
         buttn = Button(
-            location,
-            # bg="green",
+            location, 
+            # activebackground="gray85",
             width=8,
             height=4,
             # text=f"{self.x},{self.y}"
@@ -27,14 +32,34 @@ class Cell:
 
         buttn.bind('<Button-1>', self.left_click_actions)
         buttn.bind('<Button-3>', self.right_click_actions)
-
         self.cell_button_obj = buttn
+
+    @staticmethod
+    def create_cell_count_label(location):
+        lbl =Label(
+            location,
+            bg="green",
+            fg="white",
+            text= f"Cells Left: {Cell.cell_count}",
+            width=12,
+            height=4,
+            font=("",20)
+        )
+        Cell.cell_count_label_object = lbl
 
     def left_click_actions(self, event):
         if self.is_landmine:
-            self.show_mine()
+            self.show_landmine()
         else:
+            if self.surrounded_cells_mines_length ==0:
+                for cell in self.surrounded_cells:
+                    
+                    cell.show_cell()
+                    # self.cell_button_obj.configure(bg="green")
+                    
+            
             self.show_cell()
+            # self.cell_button_obj.configure(bg="white")
 
     #return a cell object based on x,y location
     def get_cell_by_axis(self, x,y):
@@ -64,18 +89,52 @@ class Cell:
         for cell in self.surrounded_cells:
             if cell.is_landmine:
                 counter+=1
+
         return counter
 
     def show_cell(self):
-        self.cell_button_obj.configure(text=self.surrounded_cells_mines_length)
+        if not self.is_opened:
+            Cell.cell_count -= 1
+            self.cell_button_obj.configure(bg="green",text=self.surrounded_cells_mines_length)
+            # self.cell_button_obj.configure(bg="green")
+            #replace text of cell count with newer count
+            if Cell.cell_count_label_object:
+                Cell.cell_count_label_object.configure(
+                    text=f"Cells Left: {Cell.cell_count}"
+                )
 
-    def show_mine(self):
-        # interrrupt game and display message player lost
+        #mark cell as opened
+        self.is_opened=True
+
+    def show_landmine(self):
+        
         self.cell_button_obj.configure(bg="red")
+        # ctypes.windll.user32.MessageBoxW(0, 'You clicked on a mine', 'Game Over', 0)
+        # tkinter.messagebox.showinfo(title=Hi, message=Bye, **options)
+        # mssg=message("d")
+        # mssg.showinfo(title=Hi, message=Bye, **options)
+
+        # ttk.Button(
+        #     root,
+        #     text='Show an warning message',
+        #     command=lambda: showwarning(
+        #         title='Warning',
+        #         message='This is a warning message.')
+        # ).pack(**options)
+        # tkinter.messagebox.showinfo("Welcome to GFG", "South Button clicked")
+
 
     def right_click_actions(self, event):
-        print(event)
-        print("right click")
+        if not self.is_mine_candidate:
+            self.cell_button_obj.configure(
+                bg="orange"
+            )
+            self.is_mine_candidate=True
+        else:
+            self.cell_button_obj.configure(
+                 bg='gray85'               
+            )
+            self.is_mine_candidate=False
 
 
     @staticmethod
